@@ -1,4 +1,4 @@
-#include "helper.h"
+#include "../include/helper.h"
 
 Helper::Helper() {}
 
@@ -15,9 +15,6 @@ Helper::RobTarget2Affine3d(RobPoint target, ToolMat tool)
 
   transformation1 =
     transformation1 *
-    //    Eigen::AngleAxisd(M_PI, y_rot) *
-//    Eigen::AngleAxisd(90 * 0.0174533, x_rot) *
-
     Eigen::Translation3d(Eigen::Vector3d(tool.x, tool.y, tool.z))
           * Eigen::AngleAxisd(tool.rx * 0.0174533, x_rot)
           * Eigen::AngleAxisd(tool.ry * 0.0174533, y_rot)
@@ -179,6 +176,7 @@ Helper::RS2toPCL(cv::Mat depth,
         Z = (f_scale * d);
 
         if (Z > 0.400 && Z < 1.5) {
+
           pcl::PointXYZRGB p;
 
           p.z = Z;

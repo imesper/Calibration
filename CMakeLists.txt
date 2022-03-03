@@ -25,6 +25,10 @@ find_package(PCL REQUIRED)
 
 find_package(OpenMP)
 
+file(GLOB project_headers "${CMAKE_SOURCE_DIR}/include/*.h")
+file(GLOB project_src "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB project_ui "${CMAKE_SOURCE_DIR}/src/*.ui")
+
 if(ANDROID)
   add_library(Calibration SHARED
     main.cpp
@@ -34,12 +38,9 @@ if(ANDROID)
   )
 else()
   add_executable(Calibration
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    helper.h
-    helper.cpp
+      ${project_headers}
+      ${project_src}
+      ${project_ui}
   )
 endif()
 #if(OpenMP_CXX_FOUND)

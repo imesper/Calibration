@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "../include/mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QDebug>
 MainWindow::MainWindow(QWidget* parent)
@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget* parent)
 //  toolMat =
 //    new ToolMat(-0.048, -0.04107, 0.078, 90.7997, 1.0464, 0.5910);
   toolMat =
-    new ToolMat(-0.050, -0.04418107, 0.078, 90.917997, 1.17240464, 0.485910);
+    new ToolMat(-0.050, -0.04418107, 0.078, 90.917997, 1.17740464, 0.485910);
   //        new ToolMat(-0.04689, -0.0411, 0.07864, 90.8897104, 0.8983838, 0.490231);
   mP6 = new RobPoint(1314.19,
                      -1063.44,
@@ -93,24 +93,24 @@ MainWindow::MainWindow(QWidget* parent)
   std::string folder =
     "/Users/ianesper/Development/Test/";
   _clouds.append(
-    Helper::loadBag(folder + "Cam_0_2.bag", _refCloud, transformation, true));
+    Helper::loadBag(folder + "Cam_0_1.bag", _refCloud, transformation, true));
   *tempCloud = *_refCloud;
   _pointsclouds.append(tempCloud);
-  _clouds.append(
-    Helper::loadBag(folder + "Cam_1_2.bag", temp2Cloud, transformation2, true));
-  _pointsclouds.append(temp2Cloud);
-  _clouds.append(
-    Helper::loadBag(folder + "Cam_2_2.bag", temp3Cloud, transformation, false));
-  _pointsclouds.append(temp3Cloud);
-  _clouds.append(
-    Helper::loadBag(folder + "Cam_3_2.bag", temp4Cloud, transformation, false));
-  _pointsclouds.append(temp4Cloud);
-  _clouds.append(
-    Helper::loadBag(folder + "Cam_4_2.bag", temp5Cloud, transformation, false));
-  _pointsclouds.append(temp5Cloud);
-  _clouds.append(
-    Helper::loadBag(folder + "Cam_5_2.bag", temp6Cloud, transformation, false));
-  _pointsclouds.append(temp6Cloud);
+//  _clouds.append(
+//    Helper::loadBag(folder + "Cam_1_1.bag", temp2Cloud, transformation2, true));
+//  _pointsclouds.append(temp2Cloud);
+//  _clouds.append(
+//    Helper::loadBag(folder + "Cam_2_1.bag", temp3Cloud, transformation, false));
+//  _pointsclouds.append(temp3Cloud);
+//  _clouds.append(
+//    Helper::loadBag(folder + "Cam_3_1.bag", temp4Cloud, transformation, false));
+//  _pointsclouds.append(temp4Cloud);
+//  _clouds.append(
+//    Helper::loadBag(folder + "Cam_4_1.bag", temp5Cloud, transformation, false));
+//  _pointsclouds.append(temp5Cloud);
+//  _clouds.append(
+//    Helper::loadBag(folder + "Cam_5_1.bag", temp6Cloud, transformation, false));
+//  _pointsclouds.append(temp6Cloud);
 
   pcl::PointCloud<pcl::PointXYZRGBL>::Ptr tempCloudT(
     new pcl::PointCloud<pcl::PointXYZRGBL>);
@@ -391,3 +391,15 @@ MainWindow::on_horizontalSliderPSize_valueChanged(int value)
     pcl::visualization::PCL_VISUALIZER_POINT_SIZE, value, "cloud");
   ui->qvtkWidget->update();
 }
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString directory = QFileDialog::getExistingDirectory(
+      this,
+      tr("Open Directory"),
+      "~/",
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    CalibrationEval calib(directory);
+    calib.CalcError();
+}
+

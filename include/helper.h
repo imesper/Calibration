@@ -1,6 +1,7 @@
 #ifndef HELPER_H
 #define HELPER_H
 
+
 #include <QString>
 #include <iostream>
 #include <string>
@@ -21,27 +22,26 @@
 #include <opencv2/imgproc.hpp>
 
 #include <pcl/common/common_headers.h>
+#include <pcl/common/pca.h>
+#include <pcl/console/parse.h>
+#include <pcl/features/fpfh_omp.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/features/normal_3d_omp.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/io/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/registration/sample_consensus_prerejective.h>
+#include <pcl/search/kdtree.h>
+#include <pcl/surface/gp3.h>
+#include <pcl/surface/mls.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/visualization/pcl_visualizer.h>
 
-class RobPoint
-{
-public:
-  RobPoint(float x, float y, float z, float q1, float q2, float q3, float q4)
-    : x(x)
-    , y(y)
-    , z(z)
-    , q1(q1)
-    , q2(q2)
-    , q3(q3)
-    , q4(q4)
-  {}
-  float x;
-  float y;
-  float z;
-  float q1;
-  float q2;
-  float q3;
-  float q4;
-};
+#include "robpoint.h"
 
 class ToolMat
 {

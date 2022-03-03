@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QVector>
+#include <QFileDialog>
 #include <vtkActor.h>
 #include <vtkCamera.h>
 
@@ -20,7 +21,7 @@
 #include <pcl/visualization/pcl_visualizer.h>
 
 #include "helper.h"
-
+#include "calibrationeval.h"
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -51,6 +52,8 @@ private slots:
   void on_doubleSpinBox_z_valueChanged(double arg1);
 
   void on_horizontalSliderPSize_valueChanged(int value);
+
+  void on_pushButton_clicked();
 
 private:
   Ui::MainWindow* ui;
