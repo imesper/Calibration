@@ -1,15 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QFileDialog>
 #include <QMainWindow>
 #include <QVector>
-#include <QFileDialog>
 #include <vtkActor.h>
 #include <vtkCamera.h>
 
+#include <vtkNew.h>
 #include <vtkRenderWindow.h>
 #include <vtkRendererCollection.h>
-#include <vtkNew.h>
 //#include <vtkOpenGLRenderWindow.h>
 #include <QVTKOpenGLNativeWidget.h>
 #include <vtkGenericOpenGLRenderWindow.h>
@@ -20,8 +20,8 @@
 #include <pcl/registration/icp_nl.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
-#include "helper.h"
 #include "calibrationeval.h"
+#include "helper.h"
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -69,9 +69,10 @@ private:
   pcl::PointCloud<pcl::PointXYZRGBL>::Ptr _refUpCloud;
   pcl::PointCloud<pcl::PointXYZRGBL>::Ptr _refRightCloud;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr _cloud;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr _charucoCloud;
   pcl::PointCloud<pcl::PointXYZRGBL>::Ptr _pointsCloud;
   pcl::visualization::PCLVisualizer::Ptr _vis;
-
+  pcl::visualization::PCLVisualizer::Ptr c_vis;
   std::map<int, std::vector<cv::Point2f>> m_markerCorners;
 
   Eigen::Affine3d transformation;
@@ -89,5 +90,7 @@ private:
   double smea;
   double rmse;
   void updateCloud();
+  CalibrationEval calibrationEval;
+  bool calibrationEvaluated;
 };
 #endif // MAINWINDOW_H

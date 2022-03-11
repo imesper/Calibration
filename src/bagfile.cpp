@@ -1,10 +1,9 @@
-#include <librealsense2/rs.hpp>
 #include "../include/bagfile.h"
 #include <QDebug>
+#include <librealsense2/rs.hpp>
 
 #include <Eigen/Dense>
 #include <opencv2/core/eigen.hpp>
-
 
 BagFile::BagFile()
   : _cameraPos(0)
@@ -18,54 +17,51 @@ BagFile::init(QString filename, QString matrix)
   this->_filename = filename;
   this->_matrix = matrix;
 
-    rs2::pipeline pipe;
-    rs2::config cfg;
+  rs2::pipeline pipe;
+  rs2::config cfg;
 
-    std::cout << filename.toStdString() << std::endl;
-    cfg.enable_device_from_file(filename.toStdString());
+  std::cout << filename.toStdString() << std::endl;
+  cfg.enable_device_from_file(filename.toStdString());
 
-    std::cout << "Pipe -> First" << std::endl;
+  std::cout << "Pipe -> First" << std::endl;
 
-    pipe.start(cfg);
-    auto device = pipe.get_active_profile().get_device();
+  pipe.start(cfg);
+  auto device = pipe.get_active_profile().get_device();
 
-    rs2::frameset fs, aligned_frames;
-    std::cout << "Frameset -> First entering wait for frame" << std::endl;
+  rs2::frameset fs, aligned_frames;
+  std::cout << "Frameset -> First entering wait for frame" << std::endl;
 
-    // First Frame
+  // First Frame
+  fs = pipe.wait_for_frames();
+  std::cout << fs.size() << std::endl;
+  auto intrinsic = fs.get_depth_frame()
+                     .get_profile()
+                     .as<rs2::video_stream_profile>()
+                     .get_intrinsics();
+
+  auto color_intrinsic = fs.get_color_frame()
+                           .get_profile()
+                           .as<rs2::video_stream_profile>()
+                           .get_intrinsics();
+
+  cv::Mat depth;
+
+  rs2::temporal_filter temp_filter(0.1f, 20, 3);
+  rs2::spatial_filter spatial_filter(0.4f, 4, 3, 1);
+  for (size_t j = 0; j < 5; j++) {
     fs = pipe.wait_for_frames();
-std::cout << fs.size() << std::endl;
-    auto intrinsic = fs.get_depth_frame()
-                       .get_profile()
-                       .as<rs2::video_stream_profile>()
-                       .get_intrinsics();
+    //         fs = spatial_filter.process(fs);
+    //         fs = temp_filter.process(fs);
 
-    auto color_intrinsic = fs.get_color_frame()
-                             .get_profile()
-                             .as<rs2::video_stream_profile>()
-                             .get_intrinsics();
-
-    cv::Mat depth;
-
-    rs2::temporal_filter temp_filter(0.1f, 20, 3);
-rs2::spatial_filter spatial_filter(0.4f, 4, 3, 1);
-    for (size_t j = 0; j < 5; j++) {
-         fs = pipe.wait_for_frames();
-         fs = spatial_filter.process(fs);
-         fs = temp_filter.process(fs);
-
-      rs2::align align(RS2_STREAM_COLOR);
-      try{
-        fs = align.process(fs);
-      } catch(std::exception& e){
-
-      }
-}
-    rs2::depth_frame depth_frame = fs.get_depth_frame();
-    _depths.emplace_back(depth_frame);
-    _colors.emplace_back(fs.get_color_frame());
-
-
+    rs2::align align(RS2_STREAM_COLOR);
+    try {
+      fs = align.process(fs);
+    } catch (std::exception& e) {
+    }
+  }
+  rs2::depth_frame depth_frame = fs.get_depth_frame();
+  _depths.emplace_back(depth_frame);
+  _colors.emplace_back(fs.get_color_frame());
 
   _serial = device.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
   pipe.stop();
@@ -101,7 +97,6 @@ BagFile::charucoTransformation() const
   return m_charucoTransformation;
 }
 
-
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr
 BagFile::projectPointCloud(ToolMat tool,
                            int frame,
@@ -120,14 +115,12 @@ BagFile::projectPointCloud(ToolMat tool,
                        cv::Mat::AUTO_STEP);
 
   auto temp = cv::Mat(_depths[frame].get_height(),
-                  _depths[frame].get_width(),
-                  CV_16UC1,
-                  const_cast<void*>(_depths[frame].get_data()),
-                  cv::Mat::AUTO_STEP);
+                      _depths[frame].get_width(),
+                      CV_16UC1,
+                      const_cast<void*>(_depths[frame].get_data()),
+                      cv::Mat::AUTO_STEP);
   cv::Mat depth;
   temp.convertTo(depth, CV_64F);
-
-
 
   std::cout << "Color frame: " << depth.size() << std::endl;
 
@@ -144,21 +137,20 @@ BagFile::projectPointCloud(ToolMat tool,
   cameraMatrix.at<float>(1, 2) = color_intrinsic.ppy;
   cameraMatrix.at<float>(2, 2) = 1;
 
-
   Helper::detectCharucoBoardWithCalibrationPose(
     color, cameraMatrix, m_charucoTransformation, m_markerCorners);
   double tansl[3];
-  tansl[0] =m_charucoTransformation.translation()[0];
-          tansl[1]=m_charucoTransformation.translation()[1];
-          tansl[2]=m_charucoTransformation.translation()[2];
+  tansl[0] = m_charucoTransformation.translation()[0];
+  tansl[1] = m_charucoTransformation.translation()[1];
+  tansl[2] = m_charucoTransformation.translation()[2];
 
   auto cloud = Helper::RS2toPCL(depth,
-                      color,
-                      color_intrinsic,
-                      m_markerPointcloud,
-                      m_markerCorners,
-                      0,
-                      false ? tansl : nullptr);
+                                color,
+                                color_intrinsic,
+                                m_markerPointcloud,
+                                m_markerCorners,
+                                0,
+                                false ? tansl : nullptr);
 
   if (m_markerPointcloud->width == 0 && m_markerPointcloud->points.size() > 0) {
 
@@ -175,17 +167,15 @@ BagFile::projectPointCloud(ToolMat tool,
   Cloud_Filter.setInputCloud(cloud);
   Cloud_Filter.filter(*cloud);
 
-
   if (!_matrix.isEmpty()) {
     std::cout << "Reading Transformation Matrix." << std::endl;
-//    Eigen::Affine3d t = Helper::readTransformation(_matrix.toStdString());
-    //std::cout << "Eigen Transformation Matrix: " << t.matrix() << std::endl;
-    //pcl::transformPointCloud(*cloud, *cloud, t);
+    //    Eigen::Affine3d t = Helper::readTransformation(_matrix.toStdString());
+    // std::cout << "Eigen Transformation Matrix: " << t.matrix() << std::endl;
+    // pcl::transformPointCloud(*cloud, *cloud, t);
   }
 
-//    std::cout << "Eigen Transformation Matrix: " << t.matrix() << std::endl;
-//    pcl::transformPointCloud(*cloud, *cloud, t);
-
+  //    std::cout << "Eigen Transformation Matrix: " << t.matrix() << std::endl;
+  //    pcl::transformPointCloud(*cloud, *cloud, t);
 
   qDebug() << cloud->size();
 
